@@ -16,13 +16,17 @@ jobs:
           submodules: true
           lfs: false
 
-      # --- PERMANENT CSP FIX START ---
+      # --- PERMANENT CSP & CORS ROUTE FIX START ---
       - name: Inject Custom CSP Header Fix
         run: |
           if [ -f "staticwebapp.config.json" ]; then
+            # Fix 1: Add data: back to the CSP layout
             sed -i "s|default-src https: blob: 'unsafe-eval' 'unsafe-inline'|default-src https: blob: data: 'unsafe-eval' 'unsafe-inline'|g" staticwebapp.config.json
+            
+            # Fix 2: Force manifest.json to allow anonymous public access
+            sed -i 's|"routes": \[|"routes": \[\n    { "route": "/manifest.json", "allowedRoles": ["anonymous"] },|g' staticwebapp.config.json
           fi
-      # --- PERMANENT CSP FIX END ---
+      # --- PERMANENT CSP & CORS ROUTE FIX END ---
 
       - name: Build And Deploy
         id: builddeploy
